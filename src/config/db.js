@@ -9,7 +9,6 @@ export const connectDb =async()=>{
     const conn = await mongoose.connect(mongoDbUrl.toString(),{
         useNewUrlParser :true,
     })
-    console.log({conn})
     console.log("Database Created Successfuly")
    }catch(error){
 
