@@ -3,6 +3,7 @@ import { configDotenv } from "dotenv";
 const app = express()
 import { connectDb } from "./src/config/db.js";
 import { userRouter } from "./src/routes/userRouter.js";
+import { jobRouter } from "./src/routes/jobRouter.js";
 import cors from 'cors'
 
 configDotenv()
@@ -12,7 +13,7 @@ connectDb()
 app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use([userRouter])
+app.use([userRouter , jobRouter])
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
