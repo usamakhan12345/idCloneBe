@@ -19,7 +19,7 @@ export const SignUp = async(req ,res) =>{
             })
         }
 
-         const existingUser = await  User.findOne(req.body)
+         const existingUser = await  User.findOne({email})
 
          if(existingUser){
             return res.status(409).send({

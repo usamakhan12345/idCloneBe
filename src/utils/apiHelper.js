@@ -13,7 +13,18 @@ export const comparePassword = async(password , bcryptedPassword)=>{
     
 }
 
-export const generateToken =  (email , firstName )=>{
+export const generateToken =  (firstName , email )=>{
    return  jwt.sign({email,firstName}, process.env.JWT_SCRET_KEY  , { expiresIn: 60 * 60 })
 
+}
+
+export const decodeToken = (token) =>{
+      let decoded;
+      try {
+        decoded = jwt.verify(token, process.env.JWT_SCRET_KEY); 
+  
+      } catch (err) {
+        return false;
+      }
+      return decoded
 }
