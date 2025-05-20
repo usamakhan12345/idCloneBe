@@ -114,3 +114,31 @@ export const getMyJobs = async(req,res) => {
     }
 
 }
+
+
+export const getAllJobs = async(req,res)=>{
+  try{
+
+    const allJobs = await Job.find({})
+
+    if(!allJobs){
+      return res.status(409).send({
+        message : "Jobs are not available",
+        error : true 
+      })
+    }
+
+    return res.status(200).send({
+      message : 'Get Jobs Successfuly',
+      jobs : allJobs,
+      numberOfResults : allJobs?.length
+    })
+
+
+  }catch(error){
+    return res.status(500).send({
+      message : error.message,
+      error: true
+    })
+  }
+}
