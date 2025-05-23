@@ -7,8 +7,7 @@ const jobSchema = new Schema({
   salaryRange:     { type: String, required : true},
   jobDescription: { type: String , required : true }, 
   jobType :  { type: String, required: true },
-  token :  { type: String, required: true },
-  email: { type: String, required: true, lowercase: true },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
 
 }, { timestamps: true });
 

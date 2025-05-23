@@ -17,7 +17,6 @@ export const validateJobScehma = joi.object({
     location:joi.string().max(20).required(),
     salaryRange:joi.string().required(),
     jobDescription:joi.string().required(),
-    jobType: joi.string().required(),
-    email:joi.string().email().required(),
+    jobType: joi.string().required()
 
 })
