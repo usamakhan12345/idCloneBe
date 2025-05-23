@@ -4,6 +4,7 @@ import { User } from "../models/userModel.js";
 import { validateJobScehma } from "../utils/joiSchemas.js";
 import { configDotenv } from "dotenv";
 import { decodeToken } from "../utils/apiHelper.js";
+import mongoose from "mongoose";
 
 
 configDotenv()
@@ -35,11 +36,9 @@ export const createJob = async (req, res) => {
 
     const decodedToken = decodeToken(token)
 
-    console.log({ decodedToken })
     let user;
     if (decodedToken) {
       user = await User.findOne({ email: decodedToken.email });
-      console.log("usererrr", user)
       if (!user) {
         return res.status(404).send({ message: "User not found", status: 404 });
       }
@@ -80,7 +79,6 @@ export const getMyJobs = async (req, res) => {
     const decodedToken = decodeToken(token)
 
 
-    console.log("user-------------->", token)
     if (decodedToken) {
       const user = await User.findOne({ email: decodedToken.email })
       if (!user) {
@@ -94,7 +92,7 @@ export const getMyJobs = async (req, res) => {
         message: "Get Jobs Successfuly",
         error: false,
         jobs: myJobs,
-        totalCount : myJobs?.length
+        totalCount: myJobs?.length
 
       })
     } else {
@@ -165,7 +163,7 @@ export const searchJobs = async (req, res) => {
     })
     if (searchJobs) {
 
-      return res.status(200).send({ message: "Jobs Search Successfuly", error: false ,  jobs : searchedJobs , totalJobs : searchedJobs.length })
+      return res.status(200).send({ message: "Jobs Search Successfuly", error: false, jobs: searchedJobs, totalJobs: searchedJobs.length })
     }
     return res.status(200).send({ message: "No Jobs Found", error: false })
 
@@ -173,5 +171,76 @@ export const searchJobs = async (req, res) => {
   } catch (error) {
     return res.status(200).send({ message: error.message, error: false })
 
+  }
+}
+
+
+export const likedSavedJob = async (req, res) => {
+  try {
+    const { jobId, isLike, isSave } = req.body
+    const user = req.user
+
+
+    const currentUser = await User.findOne({ email: user.email })
+
+
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ message: 'Invalid Job ID' });
+    }
+    if (isLike) {
+      const findIndex = currentUser.likedJobs.indexOf(jobId)
+      if (findIndex === -1) {
+        currentUser.likedJobs.push(jobId)
+      } else {
+        currentUser.likedJobs.splice(findIndex, 1)
+
+      }
+    } else if (isSave) {
+
+      const findIndex = currentUser.savedJobs.indexOf(jobId)
+      if (findIndex === -1) {
+        currentUser.savedJobs.push(jobId)
+      } else {
+        currentUser.savedJobs.splice(findIndex, 1)
+
+      }
+
+    }
+
+
+    await currentUser.save()
+
+    res.send({ likedJobs: currentUser.likedJobs, savedJobs: currentUser.savedJobs });
+
+
+  } catch (error) {
+    return res.send({ message: error.message })
+
+  }
+}
+
+
+export const getMySavedLikedJobs = async (req, res) => {
+  try {
+
+
+    const { type } = req.query;
+    const userEmail = req.user.email
+
+    // const user = await User.findOne({email : userEmail} , req.query.type === 'savedJobs' ? '-_id -createdBy -createdAt -updatedAt -likedJobs -password' : '-_id -createdBy -createdAt -updatedAt -savedJobs -password').populate(`${req.query.type}` ,req.query.type === 'savedJobs' ? '-_id -createdBy -createdAt -updatedAt' : '-_id -createdBy -createdAt -updatedAt' )
+    const projection = '-_id -createdBy -createdAt -updatedAt -password';
+    const excludeField = type === 'savedJobs' ? '-likedJobs' : '-savedJobs';
+
+    const user = await User.findOne(
+      { email: userEmail },
+      `${projection} ${excludeField}`
+    ).populate(type, '-_id -createdBy -createdAt -updatedAt');
+
+
+    return res.status(200).send({ message: user })
+
+
+  } catch (error) {
+    return res.status(500).send({ message: error.message })
   }
 }
