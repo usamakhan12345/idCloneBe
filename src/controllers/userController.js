@@ -58,6 +58,7 @@ export const SignUp = async(req ,res) =>{
 
 export const signIn = async(req,res) =>{
     try {
+        console.log(req)
         const {email , password } = req.body
 
         if(!email ||  !password ){
@@ -84,7 +85,7 @@ export const signIn = async(req,res) =>{
 
 
         }else {
-            return res.status().send({
+            return res.status(401).send({
                 message : "Wrong Password",
                 status : 401
             })
@@ -95,7 +96,7 @@ export const signIn = async(req,res) =>{
 
 
     }catch(error){
-        return res.status().send({
+        return res.status(500).send({
             message : error.message,
         })
     }
