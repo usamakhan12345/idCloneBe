@@ -2,12 +2,11 @@ import {User} from "../models/userModel.js"
 import {validateUserSchema} from '../utils/joiSchemas.js'
 import { bcryptPassword , comparePassword , generateToken } from "../utils/apiHelper.js"
 
-
 export const SignUp = async(req ,res) =>{
     try{
-        const {firstName , lastName , email , phoneNumber , password  } = req.body
-        if(!firstName || !lastName || !email || !phoneNumber || !password ){
-            return res.status(400).send("All fields are required")
+        const {name  , email , phoneNumber , password  } = req.body
+        if(!name  || !email || !phoneNumber || !password ){
+            return res.status(400).send("All fields are requiredd")
         }
 
 
@@ -58,7 +57,6 @@ export const SignUp = async(req ,res) =>{
 
 export const signIn = async(req,res) =>{
     try {
-        console.log(req)
         const {email , password } = req.body
 
         if(!email ||  !password ){
