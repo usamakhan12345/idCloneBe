@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
 const otpSchema = new Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+    email: {type : String },
     otpCode: { type: String, required: true },
     expiredAt: {
         type: Date,

@@ -4,5 +4,5 @@ import { authMiddleware } from "../middleware/index.js";
 
 export const otpRouter = Router()
 
-otpRouter.post("/api/generate-otp", [authMiddleware] ,generateOtp)
-otpRouter.post("/api/verify-otp", [authMiddleware] ,verifyOtp)
+otpRouter.post("/api/generate-otp" ,generateOtp)
+otpRouter.post("/api/verify-otp" ,verifyOtp)
