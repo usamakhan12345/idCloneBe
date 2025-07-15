@@ -6,12 +6,10 @@ import { decodeToken } from "../utils/apiHelper.js";
 
 export const   authMiddleware = async (req, res, next) => {
     const token = req?.headers?.authorization?.split(" ")[1]
-    console.log({token})
   if (!token) return res.status(401).send('Unauthorizeding');
 
   try {
    const decoded = decodeToken(token)
-   console.log({decoded})
 
    const user = await User.findOne({ email: decoded.email })
    
