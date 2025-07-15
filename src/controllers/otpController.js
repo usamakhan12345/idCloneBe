@@ -9,7 +9,6 @@ export const generateOtp = async (req, res) => {
     try {
         const user = req.user
         const userId = new mongoose.Types.ObjectId(user._id);
-        console.log("userrr---->", userId)
         await Otp.deleteMany({ userId })
         const otp = otpgenerate.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false, digits: true })
         const generateOtp = new Otp({
@@ -35,7 +34,6 @@ export const verifyOtp = async (req, res) => {
         const { otpCode } = req.body
         const user = req.user
         const otp = await Otp.find({ userId: user._id.toString() })
-        console.log("testOtp----->", otp[0].otpCode, otpCode)
         if (otp[0]?.otpCode === otpCode) {
             await User.findByIdAndUpdate(user._id ,{ isVerified: true })
             await Otp.findByIdAndDelete(otp[0]._id)
@@ -44,7 +42,6 @@ export const verifyOtp = async (req, res) => {
             res.status(401).send({ message: 'Invalid Otp or Otp May be Expired' })
 
         }
-        console.log("otp----------->", otp)
         return res.status(200).send({ message: "All done", otp })
 
     } catch (error) {
