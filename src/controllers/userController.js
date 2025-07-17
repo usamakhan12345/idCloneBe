@@ -37,7 +37,7 @@ export const SignUp = async (req, res) => {
         const bcryptedPassword = await bcryptPassword(req.body.password)
         const newUser = new User(req.body)
         newUser.password = bcryptedPassword
-        if(isGoogleLogin){
+        if (isGoogleLogin) {
             newUser.isVerified = true
         }
 
@@ -65,13 +65,36 @@ export const SignUp = async (req, res) => {
 
 export const signIn = async (req, res) => {
     try {
-        const { email, password } = req.body
+        const { email, password, isGoogleLogin } = req.body
 
-        if (!email || !password) {
-            return res.status(400).send("All fields are required")
+        if (!isGoogleLogin) {
+            if (!email || !password) {
+                return res.status(400).send("All fields are required")
+            }
+
         }
 
+
         const existUser = await User.findOne({ email })
+
+        if (isGoogleLogin && !existUser) {
+            const newUser = new User(req.body)
+            newUser.isVerified = true
+            await newUser.save()
+            const token = await generateToken(existUser.firstName, existUser.email)
+            return res.status(200).send({
+                message: "User Loggin Successfuly",
+                token
+            })
+        }
+
+        if (isGoogleLogin && existUser) {
+            const token = await generateToken(existUser.firstName, existUser.email)
+            return res.status(200).send({
+                message: "User Loggin Successfuly",
+                token
+            })
+        }
 
         if (!existUser) {
             return res.status(400).send({

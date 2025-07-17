@@ -148,12 +148,8 @@ export const getAllJobs = async (req, res) => {
 export const searchJobs = async (req, res) => {
   try {
     const { searchQuery } = req.body
-    // if (!searchQuery) {
-    //   return res.status(400).send({
-    //     message: 'Bad Request',
-    //     error: true
-    //   })
-    // }
+    const userId = req?.user?._id
+
     const searchedJobs = await Job.find({
       $or: [
         { jobTitle: { $regex: searchQuery, $options: 'i' } },
@@ -161,15 +157,31 @@ export const searchJobs = async (req, res) => {
         { jobDescription: { $regex: searchQuery, $options: 'i' } },
       ]
     })
-    if (searchedJobs) {
 
-      return res.status(200).send({ message: "Jobs Search Successfuly", error: false, jobs: searchedJobs, totalJobs: searchedJobs.length })
+
+
+
+    let likeJobsIds = []
+    if (userId) {
+      const user = await User.findById(userId).select('likedJobs')
+      likeJobsIds = user.likedJobs.map(id => id.toString())
+    }
+
+
+    const jobsWithLikeStatus = searchedJobs.map(job => ({
+      ...job.toObject(),
+      isSaved: likeJobsIds.includes(job._id.toString()),
+    }));
+
+    if (jobsWithLikeStatus) {
+
+      return res.status(200).send({ message: "Jobs Search Successfuly", error: false, jobs: jobsWithLikeStatus, totalJobs: jobsWithLikeStatus.length })
     }
     return res.status(200).send({ message: "No Jobs Found", error: false })
 
 
   } catch (error) {
-    return res.status(200).send({ message: error.message, error: false })
+    return res.status(200).send({ message: error.message, error: true })
 
   }
 }
