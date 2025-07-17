@@ -9,6 +9,7 @@ const userSchema = new Schema({
   isVerified:  { type: Boolean, default : false },
   likedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Jobs' }],
   savedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Jobs' }],
+  isGoogleLogin : {type : Boolean, default : false}
 }, { timestamps: true });
 
 export const User = mongoose.model('User', userSchema);

@@ -7,7 +7,8 @@ export const validateUserSchema = joi.object({
     name:joi.string().max(20).required(),
     email:joi.string().email().required(),
     phoneNumber:joi.string().pattern(/^[0-9]{11}$/).required(),
-    password: joi.string().required()
+    password: joi.string().required(),
+    isGoogleLogin:joi.boolean().default(false)
 })
 
 

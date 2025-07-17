@@ -148,12 +148,12 @@ export const getAllJobs = async (req, res) => {
 export const searchJobs = async (req, res) => {
   try {
     const { searchQuery } = req.body
-    if (!searchQuery) {
-      return res.status(400).send({
-        message: 'Bad Request',
-        error: true
-      })
-    }
+    // if (!searchQuery) {
+    //   return res.status(400).send({
+    //     message: 'Bad Request',
+    //     error: true
+    //   })
+    // }
     const searchedJobs = await Job.find({
       $or: [
         { jobTitle: { $regex: searchQuery, $options: 'i' } },
@@ -161,7 +161,7 @@ export const searchJobs = async (req, res) => {
         { jobDescription: { $regex: searchQuery, $options: 'i' } },
       ]
     })
-    if (searchJobs) {
+    if (searchedJobs) {
 
       return res.status(200).send({ message: "Jobs Search Successfuly", error: false, jobs: searchedJobs, totalJobs: searchedJobs.length })
     }
