@@ -163,12 +163,12 @@ export const searchJobs = async (req, res) => {
 
     let likeJobsIds = []
     if (userId) {
-      const user = await User.findById(userId).select('likedJobs')
-      likeJobsIds = user.likedJobs.map(id => id.toString())
+      const user = await User.findById(userId).select('savedJobs')
+      likeJobsIds = user?.savedJobs?.map(id => id.toString())
     }
 
 
-    const jobsWithLikeStatus = searchedJobs.map(job => ({
+    const jobsWithLikeStatus =searchedJobs.length > 0 && searchedJobs.map(job => ({
       ...job.toObject(),
       isSaved: likeJobsIds.includes(job._id.toString()),
     }));
