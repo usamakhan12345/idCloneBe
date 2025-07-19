@@ -76,7 +76,7 @@ export const signIn = async (req, res) => {
 
 
         const existUser = await User.findOne({ email })
-
+        console.log("existingUser" , existUser)
         if (isGoogleLogin && !existUser) {
             const newUser = new User(req.body)
             newUser.isVerified = true
@@ -89,7 +89,7 @@ export const signIn = async (req, res) => {
         }
 
         if (isGoogleLogin && existUser) {
-            const token = await generateToken(existUser.firstName, existUser.email)
+            const token = await generateToken(existUser?.firstName, existUser?.email)
             return res.status(200).send({
                 message: "User Loggin Successfuly",
                 token

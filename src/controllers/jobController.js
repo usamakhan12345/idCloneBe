@@ -147,7 +147,7 @@ export const getAllJobs = async (req, res) => {
 
 export const searchJobs = async (req, res) => {
   try {
-    const { searchQuery } = req.body
+    const { searchQuery, isOnlySavedJobs } = req.body
     const userId = req?.user?._id
 
     const searchedJobs = await Job.find({
@@ -168,10 +168,16 @@ export const searchJobs = async (req, res) => {
     }
 
 
-    const jobsWithLikeStatus =searchedJobs.length > 0 && searchedJobs.map(job => ({
+    const jobsWithLikeStatus = searchedJobs.length > 0 && searchedJobs.map(job => ({
       ...job.toObject(),
       isSaved: likeJobsIds.includes(job._id.toString()),
     }));
+
+    if (isOnlySavedJobs && userId) {
+      const userSavedJobs = jobsWithLikeStatus.filter((job) => job.isSaved === true)
+      return res.status(200).send({ message: "Saved jobs fetch  Successfuly", error: false, jobs: userSavedJobs, totalJobs: userSavedJobs.length })
+
+    }
 
     if (jobsWithLikeStatus) {
 
@@ -238,15 +244,17 @@ export const getMySavedLikedJobs = async (req, res) => {
 
     const { type } = req.query;
     const userEmail = req.user.email
-
     const projection = '-_id -createdBy -createdAt -updatedAt -password';
     const excludeField = type === 'savedJobs' ? '-likedJobs' : '-savedJobs';
+
+    console.log("exclded", type, 'savedjobs', type == 'savedjobs', excludeField)
 
     const user = await User.findOne(
       { email: userEmail },
       `${projection} ${excludeField}`
     ).populate(type, '-_id -createdBy -createdAt -updatedAt');
 
+    console.log("Userrrrrrrrrrr", user)
 
     return res.status(200).send({ message: user })
 
