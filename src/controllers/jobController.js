@@ -155,8 +155,9 @@ export const searchJobs = async (req, res) => {
         { jobTitle: { $regex: searchQuery, $options: 'i' } },
         { location: { $regex: searchQuery, $options: 'i' } },
         { jobDescription: { $regex: searchQuery, $options: 'i' } },
+        {createdBy : {$ne : userId} }
       ]
-    })
+    } )
 
 
 
@@ -177,7 +178,12 @@ export const searchJobs = async (req, res) => {
       const userSavedJobs = jobsWithLikeStatus.filter((job) => job.isSaved === true)
       return res.status(200).send({ message: "Saved jobs fetch  Successfuly", error: false, jobs: userSavedJobs, totalJobs: userSavedJobs.length })
 
+    }else if(isOnlySavedJobs && !userId){
+      return res.status(404).send({ message: "User not found", error: true })
+
     }
+
+
 
     if (jobsWithLikeStatus) {
 
