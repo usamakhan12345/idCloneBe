@@ -151,13 +151,21 @@ export const searchJobs = async (req, res) => {
     const userId = req?.user?._id
 
     const searchedJobs = await Job.find({
-      $or: [
-        { jobTitle: { $regex: searchQuery, $options: 'i' } },
-        { location: { $regex: searchQuery, $options: 'i' } },
-        { jobDescription: { $regex: searchQuery, $options: 'i' } },
-        {createdBy : {$ne : userId} }
+      $and: [
+        {
+          $or: [
+            { jobTitle: { $regex: searchQuery, $options: 'i' } },
+            { location: { $regex: searchQuery, $options: 'i' } },
+            { jobDescription: { $regex: searchQuery, $options: 'i' } },
+          ]
+        },
+
+        { createdBy: { $ne: userId } }
+
+
+
       ]
-    } )
+    })
 
 
 
@@ -178,7 +186,7 @@ export const searchJobs = async (req, res) => {
       const userSavedJobs = jobsWithLikeStatus.filter((job) => job.isSaved === true)
       return res.status(200).send({ message: "Saved jobs fetch  Successfuly", error: false, jobs: userSavedJobs, totalJobs: userSavedJobs.length })
 
-    }else if(isOnlySavedJobs && !userId){
+    } else if (isOnlySavedJobs && !userId) {
       return res.status(404).send({ message: "User not found", error: true })
 
     }
@@ -267,5 +275,36 @@ export const getMySavedLikedJobs = async (req, res) => {
 
   } catch (error) {
     return res.status(500).send({ message: error.message })
+  }
+}
+
+
+
+
+export const deletJob = async (req, res) => {
+  try {
+
+    const { jobId } = req.body;
+    const userId = req.user._id
+
+    console.log('userId' , userId)
+
+    
+    if(!jobId){
+      return res.status(400).send({message:"jobId is Reqiured" , error : true})
+    }
+
+    const deletedJob = await Job.findOneAndDelete({$and:[{_id : jobId , createdBy: userId}]})
+
+    if(!deletedJob){
+      return res.status(200).send({message: 'No job find for Delete', error:false})
+    }
+
+    return res.status(200).send({ message: "job Deleted Successfuly"  , error : false , deletedJob})
+
+
+  } catch (error) {
+    return res.status(509).send({ message: error.message , error: true})
+
   }
 }

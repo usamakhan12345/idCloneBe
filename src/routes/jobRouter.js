@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createJob, getMyJobs, getAllJobs, searchJobs, likedSavedJob, getMySavedLikedJobs } from "../controllers/jobController.js";
+import { createJob, getMyJobs, getAllJobs, searchJobs, likedSavedJob, getMySavedLikedJobs  , deletJob } from "../controllers/jobController.js";
 import { authMiddleware } from "../middleware/index.js";
 import { tryAuth } from "../middleware/tryAuth.js";
 
@@ -14,3 +14,4 @@ jobRouter.get('/api/get-all-jobs', getAllJobs)
 jobRouter.post('/api/search', [tryAuth], searchJobs)
 jobRouter.post('/api/save-like-job', [authMiddleware], likedSavedJob)
 jobRouter.get('/api/get-saved-jobs', [authMiddleware], getMySavedLikedJobs)
+jobRouter.post('/api/delete-job', [authMiddleware], deletJob)
