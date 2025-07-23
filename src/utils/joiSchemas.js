@@ -13,8 +13,8 @@ export const validateUserSchema = joi.object({
 
 
 export const validateJobScehma = joi.object({
-    jobTitle:joi.string().max(20).required(),
-    location:joi.string().max(20).required(),
+    jobTitle:joi.string().max(40).required(),
+    location:joi.string().max(40).required(),
     salaryRange:joi.string().required(),
     jobDescription:joi.string().required(),
     jobType: joi.string().required()
