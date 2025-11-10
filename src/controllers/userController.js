@@ -1,6 +1,7 @@
 import { User } from "../models/userModel.js"
 import { validateUserSchema } from '../utils/joiSchemas.js'
 import { bcryptPassword, comparePassword, generateToken } from "../utils/apiHelper.js"
+import Profile from "../models/profileModel.js"; // your mongoose model
 
 export const SignUp = async (req, res) => {
     try {
@@ -131,4 +132,39 @@ export const signIn = async (req, res) => {
     }
 }
 
+export const createProfile = async (req, res) => {
+  try {
+    const { jobTitle, experience } = req.body;
 
+    // Validate required fields
+    if (!jobTitle || !experience) {
+      return res.status(400).json({ message: "Job title and experience are required" });
+    }
+
+    // Multer attaches files to req.files
+    const image = req.files?.image ? req.files.image[0].path : null;
+    const resume = req.files?.resume ? req.files.resume[0].path : null;
+
+    // Create profile object
+    const profile = new Profile({
+      jobTitle,
+      experience,
+      image,
+      resume,
+    });
+
+    // Save to DB
+    await profile.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Profile created successfully",
+      data: profile,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
