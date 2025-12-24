@@ -17,6 +17,7 @@ export const userRouter = Router()
 
 userRouter.post('/api/create-user' ,SignUp)
 userRouter.post('/api/sign-in' ,signIn)
+userRouter.post('/api/create-profile' , [authMiddleware] , createProfile)
 // userRouter.post('/api/create-profile' , [authMiddleware] ,   upload.fields([
 //     { name: "image", maxCount: 1 },
 //     { name: "resume", maxCount: 1 },

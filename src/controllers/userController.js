@@ -132,39 +132,26 @@ export const signIn = async (req, res) => {
     }
 }
 
-export const createProfile = async (req, res) => {
-  try {
-    const { jobTitle, experience } = req.body;
 
-    // Validate required fields
-    if (!jobTitle || !experience) {
-      return res.status(400).json({ message: "Job title and experience are required" });
+export const createProfile = async(req,res)=>{
+    try{
+     const { name  , company , qualification , certificate , adress , experience  ,jobRole , phoneNumber}  = req.body 
+     console.log("reqqq" , req.body)
+    if(!name || !phoneNumber   || !adress){
+        return res.status(403).send({error:true , message : "Missing Required Fields"})
     }
 
-    // Multer attaches files to req.files
-    const image = req.files?.image ? req.files.image[0].path : null;
-    const resume = req.files?.resume ? req.files.resume[0].path : null;
+    const user = await User.findOneAndUpdate({email : req.user.email}, {name},{phoneNumber}  , {new:true})
 
-    // Create profile object
-    const profile = new Profile({
-      jobTitle,
-      experience,
-      image,
-      resume,
-    });
+    console.log("userrrrr" , user)
 
-    // Save to DB
-    await profile.save();
+    const userProfile = new Profile(req.body)
+    await userProfile.save()
 
-    return res.status(201).json({
-      success: true,
-      message: "Profile created successfully",
-      data: profile,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+     return res.status(200).send({error: false , message : 'Successfuly Profile Created' , userProfile})
+     
+    }catch(error){  
+     return res.status(500).send({error: true , message : error.message})
+
+    }
+}
