@@ -6,12 +6,17 @@ configDotenv()
 const mongoDbUrl = process.env.MONGO_DB_URL
 export const connectDb =async()=>{
    try{
-    const conn = await mongoose.connect(mongoDbUrl.toString())
+    const conn = await mongoose.connect(mongoDbUrl.toString(),{
+
         useNewUrlParser :true,
+            useUnifiedTopology: true
+
+    })
+
     console.log("Database Created Successfuly")
    }catch(error){
 
-    console.log({error})
+    console.log('error--->' , error)
 
    }
 
