@@ -2,6 +2,8 @@ import { User } from "../models/userModel.js"
 import { validateUserSchema } from '../utils/joiSchemas.js'
 import { bcryptPassword, comparePassword, generateToken } from "../utils/apiHelper.js"
 import Profile from "../models/profileModel.js"; // your mongoose model
+import cloudinary from "cloudinary";
+import fs from "fs-extra";
 
 export const SignUp = async (req, res) => {
     try {
@@ -132,26 +134,105 @@ export const signIn = async (req, res) => {
     }
 }
 
+cloudinary.config({ 
+  cloud_name: 'dnzgzlxxy', 
+  api_key: '731957682875596', 
+  api_secret: 'DqETxXSmCfkIwd23LBmfAaR-hhw' 
+});
 
-export const createProfile = async(req,res)=>{
-    try{
-     const { name  , company , qualification , certificate , adress , experience  ,jobRole , phoneNumber}  = req.body 
-     console.log("reqqq" , req.body)
-    if(!name || !phoneNumber   || !adress){
-        return res.status(403).send({error:true , message : "Missing Required Fields"})
-    }
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => cb(null, "Images/"),
+//   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+// });
 
-    const user = await User.findOneAndUpdate({email : req.user.email}, {name},{phoneNumber}  , {new:true})
+// const upload = multer({ storage });
 
-    console.log("userrrrr" , user)
 
-    const userProfile = new Profile(req.body)
-    await userProfile.save()
-
-     return res.status(200).send({error: false , message : 'Successfuly Profile Created' , userProfile})
+export const createProfile = async (req, res) => {
+  try {
+    const {
      
-    }catch(error){  
-     return res.status(500).send({error: true , message : error.message})
+      name,
+      company,
+      qualification,
+      certificate,
+      adress,
+      experience,
+      jobRole,
+      phoneNumber,
+    } = req.body;
 
+    if (!name || !phoneNumber || !adress) {
+      return res.status(403).send({
+        error: true,
+        message: "Missing Required Fields",
+      });
     }
-}
+
+    // 🔹 Update user basic info
+    const user = await User.findOneAndUpdate(
+      { email: req.user.email },
+      { name, phoneNumber },
+      { new: true }
+    );
+
+    // 🔹 Handle Resume Upload
+    let resumeUrl = null;
+
+    if (req.files?.resume) {
+      const resumeFile = req.files.resume[0];
+
+      const uploadResult = await cloudinary.v2.uploader.upload(
+        resumeFile.path,
+ 
+      );
+
+      console.log("first------>" , uploadResult)
+
+      resumeUrl = uploadResult.secure_url;
+
+      // remove local file
+      await fs.remove(resumeFile.path);
+    }
+
+    // 🔹 Create Profile
+    const userProfile = new Profile({
+      userId: user._id,
+      name,
+      company,
+      qualification,
+      certificate,
+      adress,
+      experience,
+      jobRole,
+      phoneNumber,
+      resume: resumeUrl, // store Cloudinary URL
+    });
+
+    await userProfile.save();
+
+    return res.status(200).send({
+      error: false,
+      message: "Successfully Profile Created",
+      userProfile,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      error: true,
+      message: error.message,
+    });
+  }
+};
+
+
+
+export const getProfile = async(req,res)=>{
+    try{
+     const userProfile = await Profile.findOne({ userId: req.user._id })
+        console.log("testing--->" , userProfile)
+        return res.status(200).send({error : false ,data: userProfile})
+        
+    }catch(error){
+        return res.status(500).send({error:true , message : error.message})
+    }
+} 

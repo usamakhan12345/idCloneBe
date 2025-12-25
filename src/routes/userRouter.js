@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { SignUp, signIn  , createProfile} from "../controllers/userController.js";
+import { SignUp, signIn  , createProfile , getProfile} from "../controllers/userController.js";
 import { authMiddleware } from "../middleware/index.js";
+import multer from "multer";
 
 
 
@@ -8,17 +9,16 @@ import { authMiddleware } from "../middleware/index.js";
 
 export const userRouter = Router()
 
-// Multer setup
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => cb(null, "uploads/"),
-//   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-// });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "Images/"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
+
+const upload = multer({ storage });
 
 
 userRouter.post('/api/create-user' ,SignUp)
 userRouter.post('/api/sign-in' ,signIn)
-userRouter.post('/api/create-profile' , [authMiddleware] , createProfile)
-// userRouter.post('/api/create-profile' , [authMiddleware] ,   upload.fields([
-//     { name: "image", maxCount: 1 },
-//     { name: "resume", maxCount: 1 },
-//   ]) ,createProfile)
+userRouter.post('/api/create-profile' , [authMiddleware] , upload.fields([{name:'resume' , maxCount : 1}]) , createProfile)
+userRouter.get('/api/get-profile', [authMiddleware]  , getProfile)
+
