@@ -2,6 +2,8 @@ import { User } from "../models/userModel.js"
 import { validateUserSchema } from '../utils/joiSchemas.js'
 import { bcryptPassword, comparePassword, generateToken } from "../utils/apiHelper.js"
 import Profile from "../models/profileModel.js"; // your mongoose model
+import cloudinary from "cloudinary";
+import fs from "fs-extra";
 
 export const SignUp = async (req, res) => {
     try {
@@ -132,39 +134,126 @@ export const signIn = async (req, res) => {
     }
 }
 
+cloudinary.config({ 
+  cloud_name: 'dnzgzlxxy', 
+  api_key: '731957682875596', 
+  api_secret: 'DqETxXSmCfkIwd23LBmfAaR-hhw' 
+});
+
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => cb(null, "Images/"),
+//   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+// });
+
+// const upload = multer({ storage });
+
+
 export const createProfile = async (req, res) => {
   try {
-    const { jobTitle, experience } = req.body;
+    const {
+     
+      name,
+      company,
+      qualification,
+      certificate,
+      adress,
+      experience,
+      jobRole,
+      phoneNumber,
+    } = req.body;
+    console.log("req.fileeee" , req?.files)
 
-    // Validate required fields
-    if (!jobTitle || !experience) {
-      return res.status(400).json({ message: "Job title and experience are required" });
+    if (!name || !phoneNumber || !adress) {
+      return res.status(403).send({
+        error: true,
+        message: "Missing Required Fields",
+      });
     }
 
-    // Multer attaches files to req.files
-    const image = req.files?.image ? req.files.image[0].path : null;
-    const resume = req.files?.resume ? req.files.resume[0].path : null;
+    // 🔹 Update user basic info
+    const user = await User.findOneAndUpdate(
+      { email: req.user.email },
+      { name, phoneNumber },
+      { new: true }
+    );
 
-    // Create profile object
-    const profile = new Profile({
-      jobTitle,
-      experience,
-      image,
-      resume,
-    });
+    // 🔹 Handle Resume Upload
+    let resumeUrl = null;
+    let imageUrl = null
 
-    // Save to DB
-    await profile.save();
 
-    return res.status(201).json({
-      success: true,
-      message: "Profile created successfully",
-      data: profile,
+    if (req.files?.resume?.length) {
+      const resumeFile = req.files.resume[0];
+
+      const uploadResult = await cloudinary.v2.uploader.upload(
+        resumeFile.path,
+ 
+      );
+
+      console.log("first------>" , uploadResult)
+
+      resumeUrl = uploadResult.secure_url;
+
+      // remove local file
+      await fs.remove(resumeFile.path);
+    }
+    if(req.files?.image?.length){
+        const imageFile = req.files.image[0]
+        const uploadResult = await cloudinary.v2.uploader.upload(
+            imageFile.path,
+        )
+      console.log("first------>" , uploadResult)
+      imageUrl = uploadResult.secure_url;
+      await fs.remove(imageFile.path);
+
+
+
+    }
+
+   // 🔹 Create or Update Profile
+    const profile = await Profile.findOneAndUpdate(
+      { userId: user._id }, // unique per user
+      {
+        name,
+        company,
+        qualification,
+        certificate,
+        adress,
+        experience,
+        jobRole,
+        phoneNumber,
+        ...(resumeUrl && { resume: resumeUrl }),
+        ...(imageUrl && { image: imageUrl }),
+      },
+      {
+        new: true,
+        upsert: true, // 🔥 create if not exists
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    return res.status(200).send({
+      error: false,
+      message: "Profile created / updated successfully",
+      profile,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
+    return res.status(500).send({
+      error: true,
       message: error.message,
     });
   }
 };
+
+
+
+export const getProfile = async(req,res)=>{
+    try{
+     const userProfile = await Profile.findOne({ userId: req.user._id })
+        console.log("testing--->" , userProfile)
+        return res.status(200).send({error : false ,data: userProfile})
+        
+    }catch(error){
+        return res.status(500).send({error:true , message : error.message})
+    }
+} 
