@@ -161,6 +161,7 @@ export const createProfile = async (req, res) => {
       jobRole,
       phoneNumber,
     } = req.body;
+    console.log("req.fileeee" , req?.files)
 
     if (!name || !phoneNumber || !adress) {
       return res.status(403).send({
@@ -178,8 +179,10 @@ export const createProfile = async (req, res) => {
 
     // 🔹 Handle Resume Upload
     let resumeUrl = null;
+    let imageUrl = null
 
-    if (req.files?.resume) {
+
+    if (req.files?.resume?.length) {
       const resumeFile = req.files.resume[0];
 
       const uploadResult = await cloudinary.v2.uploader.upload(
@@ -194,27 +197,45 @@ export const createProfile = async (req, res) => {
       // remove local file
       await fs.remove(resumeFile.path);
     }
+    if(req.files?.image?.length){
+        const imageFile = req.files.image[0]
+        const uploadResult = await cloudinary.v2.uploader.upload(
+            imageFile.path,
+        )
+      console.log("first------>" , uploadResult)
+      imageUrl = uploadResult.secure_url;
+      await fs.remove(imageFile.path);
 
-    // 🔹 Create Profile
-    const userProfile = new Profile({
-      userId: user._id,
-      name,
-      company,
-      qualification,
-      certificate,
-      adress,
-      experience,
-      jobRole,
-      phoneNumber,
-      resume: resumeUrl, // store Cloudinary URL
-    });
 
-    await userProfile.save();
+
+    }
+
+   // 🔹 Create or Update Profile
+    const profile = await Profile.findOneAndUpdate(
+      { userId: user._id }, // unique per user
+      {
+        name,
+        company,
+        qualification,
+        certificate,
+        adress,
+        experience,
+        jobRole,
+        phoneNumber,
+        ...(resumeUrl && { resume: resumeUrl }),
+        ...(imageUrl && { image: imageUrl }),
+      },
+      {
+        new: true,
+        upsert: true, // 🔥 create if not exists
+        setDefaultsOnInsert: true,
+      }
+    );
 
     return res.status(200).send({
       error: false,
-      message: "Successfully Profile Created",
-      userProfile,
+      message: "Profile created / updated successfully",
+      profile,
     });
   } catch (error) {
     return res.status(500).send({

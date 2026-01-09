@@ -10,7 +10,8 @@ const profileSchema = new mongoose.Schema({
   adress: { type: String ,  required: true },
   experience: { type: String  ,  required: false},
   jobRole: { type: String ,  required: false },
-  resume:{ type: String ,  required: false }
+  resume:{ type: String ,  required: false },
+  image:{ type: String ,  required: false }
 }, { timestamps: true });
 
 export default mongoose.model("Profile", profileSchema);

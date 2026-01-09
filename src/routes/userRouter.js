@@ -19,6 +19,6 @@ const upload = multer({ storage });
 
 userRouter.post('/api/create-user' ,SignUp)
 userRouter.post('/api/sign-in' ,signIn)
-userRouter.post('/api/create-profile' , [authMiddleware] , upload.fields([{name:'resume' , maxCount : 1}]) , createProfile)
+userRouter.post('/api/create-profile' , [authMiddleware] , upload.fields([{name:'resume' , maxCount : 1} , {name:'image' , maxCount : 1}]) , createProfile)
 userRouter.get('/api/get-profile', [authMiddleware]  , getProfile)
 
