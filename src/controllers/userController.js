@@ -142,14 +142,14 @@ export const createProfile = async (req, res) => {
       company,
       qualification,
       certificate,
-      adress,
+      address,
       experience,
       jobRole,
       phoneNumber,
     } = req.body;
     console.log("req.fileeee", req?.files);
 
-    if (!name || !phoneNumber || !adress) {
+    if (!name || !phoneNumber || !address) {
       return res.status(403).send({
         error: true,
         message: "Missing Required Fields",
@@ -206,10 +206,11 @@ export const createProfile = async (req, res) => {
         company,
         qualification,
         certificate,
-        adress,
+        address,
         experience,
         jobRole,
         phoneNumber,
+        email : user?.email,
         ...(resumeUrl && { resume: resumeUrl }),
         ...(imageUrl && { image: imageUrl }),
       },
