@@ -5,7 +5,7 @@ import { accessChat ,sendMessage ,getMessages  } from "../controllers/chatContro
 export const chatRouter = Router()
 
 
-chatRouter.post("/chat", authMiddleware, accessChat);
-chatRouter.post("/message", authMiddleware, sendMessage);
-chatRouter.get("/message/:chatId", authMiddleware, getMessages);
+chatRouter.post("/api/chat", authMiddleware, accessChat);
+chatRouter.post("/api/message", authMiddleware, sendMessage);
+chatRouter.get("/api/message/:chatId", authMiddleware, getMessages);
 

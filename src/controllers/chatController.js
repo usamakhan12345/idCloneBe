@@ -1,7 +1,6 @@
-import { Chat } from "../models/chatModel";
-import { Message } from "../models/messageModel";
-
-
+import { Message } from "../models/messageModel.js";
+import { Chat } from "../models/chatModel.js";
+import mongoose from "mongoose";
 
 export const accessChat = async (req, res) => {
   const { userId } = req.body; // receiver
@@ -12,23 +11,23 @@ export const accessChat = async (req, res) => {
   }
 
   let chat = await Chat.findOne({
-    users: { $all: [currentUserId, userId] }
+    users: { $all: [currentUserId, userId] },
   }).populate("users", "name email");
-
   if (chat) {
     return res.status(200).json(chat);
   }
 
   const newChat = await Chat.create({
-    users: [currentUserId, userId]
+    users: [currentUserId, userId],
   });
 
-  const fullChat = await Chat.findById(newChat._id)
-    .populate("users", "name email");
+  const fullChat = await Chat.findById(newChat._id).populate(
+    "users",
+    "name email",
+  );
 
   res.status(201).json(fullChat);
 };
-
 
 export const sendMessage = async (req, res) => {
   const { chatId, text } = req.body;
@@ -41,22 +40,28 @@ export const sendMessage = async (req, res) => {
   const message = await Message.create({
     chat: chatId,
     sender: senderId,
-    text
+    text,
   });
 
   await Chat.findByIdAndUpdate(chatId, {
-    lastMessage: message._id
+    lastMessage: message._id,
   });
 
-  const fullMessage = await Message.findById(message._id)
-    .populate("sender", "name email");
+  const fullMessage = await Message.findById(message._id).populate(
+    "sender",
+    "name email",
+  );
 
   res.status(201).json(fullMessage);
 };
 
-
 export const getMessages = async (req, res) => {
   const { chatId } = req.params;
+
+  // ✅ Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(chatId)) {
+    return res.status(400).json({ message: "Invalid chat ID" });
+  }
 
   const messages = await Message.find({ chat: chatId })
     .populate("sender", "name email")
