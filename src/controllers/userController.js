@@ -99,7 +99,7 @@ export const signIn = async (req, res) => {
     if (existUser) {
       const isValidPassword = await comparePassword(
         password,
-        existUser.password
+        existUser.password,
       );
       if (isValidPassword) {
         const token = await generateToken(existUser.firstName, existUser.email);
@@ -160,7 +160,7 @@ export const createProfile = async (req, res) => {
     const user = await User.findOneAndUpdate(
       { email: req.user.email },
       { name, phoneNumber },
-      { new: true }
+      { new: true },
     );
 
     // 🔹 Handle Resume Upload
@@ -180,7 +180,7 @@ export const createProfile = async (req, res) => {
           public_id: originalName, // 👈 keeps file name
           use_filename: true,
           unique_filename: false,
-        }
+        },
       );
 
       console.log("first------>", uploadResult);
@@ -210,7 +210,7 @@ export const createProfile = async (req, res) => {
         experience,
         jobRole,
         phoneNumber,
-        email : user?.email,
+        email: user?.email,
         ...(resumeUrl && { resume: resumeUrl }),
         ...(imageUrl && { image: imageUrl }),
       },
@@ -218,7 +218,7 @@ export const createProfile = async (req, res) => {
         new: true,
         upsert: true, // 🔥 create if not exists
         setDefaultsOnInsert: true,
-      }
+      },
     );
 
     return res.status(200).send({
@@ -239,6 +239,15 @@ export const getProfile = async (req, res) => {
     const userProfile = await Profile.findOne({ userId: req.user._id });
     console.log("testing--->", userProfile);
     return res.status(200).send({ error: false, data: userProfile });
+  } catch (error) {
+    return res.status(500).send({ error: true, message: error.message });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); // Exclude password field
+    return res.status(200).send({ error: false, data: users });
   } catch (error) {
     return res.status(500).send({ error: true, message: error.message });
   }
