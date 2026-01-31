@@ -6,6 +6,7 @@ import { userRouter } from "./src/routes/userRouter.js";
 import { jobRouter } from "./src/routes/jobRouter.js";
 import cors from 'cors'
 import { otpRouter } from "./src/routes/otpRouter.js";
+import { chatRouter } from "./src/routes/chatRouter.js";
 configDotenv()
 
 const port = process.env.PORT || 3000
@@ -13,7 +14,7 @@ connectDb()
 app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use([userRouter , jobRouter , otpRouter])
+app.use([userRouter , jobRouter , otpRouter , chatRouter])
 
 app.get('/', (req, res) => {
     res.send('Hello World!')

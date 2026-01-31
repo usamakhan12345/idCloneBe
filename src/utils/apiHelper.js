@@ -13,8 +13,9 @@ export const comparePassword = async(password , bcryptedPassword)=>{
     
 }
 
-export const generateToken =  (firstName , email )=>{
-   return  jwt.sign({email,firstName}, process.env.JWT_SCRET_KEY  , { expiresIn: 60 * 60 })
+export const generateToken =  (firstName , email , id )=>{
+  console.log("Generating token for:", firstName, email, id);
+   return  jwt.sign({email,firstName, id}, process.env.JWT_SCRET_KEY  , { expiresIn: 60 * 60 })
 
 }
 
