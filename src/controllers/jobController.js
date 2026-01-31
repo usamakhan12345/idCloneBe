@@ -235,7 +235,7 @@ export const getMySavedLikedJobs = async (req, res) => {
   try {
     const { type } = req.query;
     const userEmail = req.user.email;
-    const projection = "-_id -createdBy -createdAt -updatedAt -password";
+    const projection = "-_id  -createdAt -updatedAt -password";
     const excludeField = type === "savedJobs" ? "-likedJobs" : "-savedJobs";
 
     console.log(
@@ -249,7 +249,7 @@ export const getMySavedLikedJobs = async (req, res) => {
     const user = await User.findOne(
       { email: userEmail },
       `${projection} ${excludeField}`,
-    ).populate(type, "-_id -createdBy -createdAt -updatedAt");
+    ).populate(type, "-_id  -createdAt -updatedAt");
 
     console.log("Userrrrrrrrrrr", user);
 

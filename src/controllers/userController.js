@@ -70,20 +70,22 @@ export const signIn = async (req, res) => {
     }
 
     const existUser = await User.findOne({ email });
-    console.log("existingUser", existUser);
     if (isGoogleLogin && !existUser) {
       const newUser = new User(req.body);
       newUser.isVerified = true;
       await newUser.save();
-      const token = await generateToken(existUser.firstName, existUser.email);
+      const token = await generateToken(newUser.firstName, newUser.email,newUser?._id);
+
       return res.status(200).send({
         message: "User Loggin Successfuly",
         token,
       });
     }
 
+
+
     if (isGoogleLogin && existUser) {
-      const token = await generateToken(existUser?.firstName, existUser?.email);
+      const token = await generateToken(existUser?.firstName, existUser?.email , existUser?._id);
       return res.status(200).send({
         message: "User Loggin Successfuly",
         token,
@@ -102,7 +104,7 @@ export const signIn = async (req, res) => {
         existUser.password,
       );
       if (isValidPassword) {
-        const token = await generateToken(existUser.firstName, existUser.email);
+        const token = await generateToken(existUser.firstName, existUser.email , existUser?._id);
 
         return res.status(200).send({
           message: "User Loggin Successfuly",
